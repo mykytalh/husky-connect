@@ -10,6 +10,7 @@
  },
  "dependencies": {
   "@heroui/button": "2.2.13",
+  "@heroui/card": "^2.2.14",
   "@heroui/code": "2.2.10",
   "@heroui/input": "2.4.13",
   "@heroui/kbd": "2.2.10",
@@ -23,12 +24,14 @@
   "@react-aria/ssr": "3.9.7",
   "@react-aria/visually-hidden": "3.8.19",
   "clsx": "2.1.1",
+  "firebase": "^11.4.0",
   "framer-motion": "11.13.1",
   "intl-messageformat": "^10.5.0",
   "next": "15.0.4",
   "next-themes": "^0.4.4",
   "react": "18.3.1",
-  "react-dom": "18.3.1"
+  "react-dom": "18.3.1",
+  "react-firebase-hooks": "^5.1.1"
  },
  "devDependencies": {
   "@next/eslint-plugin-next": "15.0.4",

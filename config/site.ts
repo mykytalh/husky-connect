@@ -1,8 +1,9 @@
 export type SiteConfig = typeof siteConfig;
 
 export const siteConfig = {
-  name: "Next.js + HeroUI",
-  description: "Make beautiful websites regardless of your design experience.",
+  name: "Husky Connect",
+  description:
+    "Connect and chat with your Husky community through Husky Connect. Find study groups,opportunities,resources, and more.",
   navItems: [
     {
       label: "Home",

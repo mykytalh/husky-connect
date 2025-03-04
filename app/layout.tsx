@@ -8,6 +8,7 @@ import { Providers } from "./providers";
 import { siteConfig } from "@/config/site";
 import { fontSans } from "@/config/fonts";
 import { Navbar } from "@/components/navbar";
+import { HomeNavbar } from "@/components/homeNavbar";
 
 export const metadata: Metadata = {
   title: {
@@ -38,25 +39,20 @@ export default function RootLayout({
       <body
         className={clsx(
           "min-h-screen bg-background font-sans antialiased",
-          fontSans.variable,
+          fontSans.variable
         )}
       >
         <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
           <div className="relative flex flex-col h-screen">
-            <Navbar />
+            <HomeNavbar />
             <main className="container mx-auto max-w-7xl pt-16 px-6 flex-grow">
               {children}
             </main>
-            <footer className="w-full flex items-center justify-center py-3">
-              <Link
-                isExternal
-                className="flex items-center gap-1 text-current"
-                href="https://heroui.com?utm_source=next-app-template"
-                title="heroui.com homepage"
-              >
-                <span className="text-default-600">Powered by</span>
-                <p className="text-primary">HeroUI</p>
-              </Link>
+            <footer className="fixed bottom-0 w-full flex items-center justify-center py-3 bg-white/5 backdrop-blur-sm border-t border-white/10 shadow-lg z-50">
+              <p>
+                💜©INFO 442: Group 5 (Sirak Yohannes, Aaron Jones, Christopher
+                May Chen, Mykyta Lepikash, Sid Jayadev)💜
+              </p>
             </footer>
           </div>
         </Providers>
