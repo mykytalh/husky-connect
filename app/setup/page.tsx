@@ -6,8 +6,7 @@ import { Button } from "@heroui/button";
 import { Card } from "@heroui/card";
 import { Textarea } from "@heroui/input";
 import { useRouter } from "next/navigation";
-import { db, auth } from "@/app/firebase/config";
-import { doc, setDoc } from "firebase/firestore";
+import { auth } from "@/app/firebase/config";
 import Cookies from "js-cookie";
 
 interface Course {
@@ -109,6 +108,7 @@ const CourseSelector = ({
 };
 
 const SetupPage = () => {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     image: null as File | null,
     imagePreview: "",
@@ -120,7 +120,6 @@ const SetupPage = () => {
     major: "",
     minor: "",
     gpa: "",
-    // Instead of storing a free text for courses, we store the selected course code.
     currentCourses: [] as string[],
     studyPreferences: [] as string[],
     bio: "",
@@ -240,6 +239,58 @@ const SetupPage = () => {
   const filteredMajors = majors.filter((m) =>
     m.name.toLowerCase().includes(majorSearch.toLowerCase())
   );
+
+  const handleSubmit = async () => {
+    // Validate required fields
+    if (!formData.name || !formData.campus || !formData.major) {
+      alert("Please fill in all required fields");
+      return;
+    }
+
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        router.push("/");
+        return;
+      }
+
+      // Create a clean version of formData without File object and imagePreview
+      const { image: _, imagePreview: __, ...cleanFormData } = formData;
+
+      // Prepare user data
+      const userData = {
+        ...cleanFormData,
+        setupComplete: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      // Send data to API endpoint instead of direct Firestore access
+      const response = await fetch("/api/firebase", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          uid: user.uid,
+          userData: userData,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save profile");
+      }
+
+      // Set setup completion cookie
+      Cookies.set("setup-complete", "true");
+
+      // Redirect to dashboard
+      router.push("/dashboard");
+    } catch (error) {
+      console.error("Error saving user data:", error);
+      alert("An error occurred while saving your profile");
+    }
+  };
 
   return (
     <div className="min-h-screen py-12 px-4">
@@ -646,7 +697,8 @@ const SetupPage = () => {
           {/* Submit Button */}
           <Button
             className="w-full bg-gradient-to-r from-[#4b2e83] to-[#85754d] text-white py-3 rounded-lg hover:opacity-90 transition-opacity"
-            onClick={() => console.log(formData)}
+            onClick={handleSubmit}
+            disabled={!formData.name || !formData.campus || !formData.major}
           >
             Complete Profile
           </Button>
