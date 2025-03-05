@@ -25,7 +25,7 @@ const Page = () => {
         password
       );
       if (userCredential.user) {
-        router.push("/"); // Redirect to home page after successful registration
+        router.push("/setup"); // Redirect to home page after successful registration
       }
     } catch (err: any) {
       setError(err.message);
