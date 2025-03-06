@@ -123,6 +123,8 @@ const SetupPage = () => {
     currentCourses: [] as string[],
     studyPreferences: [] as string[],
     bio: "",
+    linkedin: "",
+    instagram: "",
   });
 
   const [majors, setMajors] = useState<Array<{ code: string; name: string }>>(
@@ -132,6 +134,62 @@ const SetupPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [majorSearch, setMajorSearch] = useState("");
   const [isMajorDropdownOpen, setIsMajorDropdownOpen] = useState(false);
+  const [dataFetched, setDataFetched] = useState(false);
+
+  // Fetch user data when component mounts
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const user = auth.currentUser;
+      if (!user) {
+        router.push("/");
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/firebase?uid=${user.uid}`);
+        const data = await response.json();
+
+        if (response.ok && data) {
+          // Update form data with existing user data
+          setFormData((prev) => ({
+            ...prev,
+            name: data.name || "",
+            age: data.age || "",
+            campus: data.campus || "",
+            classStanding: data.classStanding || "",
+            degreeType: data.degreeType || "",
+            major: data.major || "",
+            minor: data.minor || "",
+            gpa: data.gpa || "",
+            currentCourses: data.currentCourses || [],
+            studyPreferences: data.studyPreferences || [],
+            bio: data.bio || "",
+            linkedin: data.linkedin || "",
+            instagram: data.instagram || "",
+            imagePreview: data.imageUrl || "",
+          }));
+
+          // If campus is selected, fetch program data
+          if (data.campus) {
+            await fetchProgramData(data.campus);
+            // Set major search to display the selected major
+            if (data.major) {
+              const majorData = majors.find((m) => m.code === data.major);
+              if (majorData) {
+                setMajorSearch(majorData.name);
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      } finally {
+        setDataFetched(true);
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   // Handle closing dropdown when clicking outside (for majors)
   useEffect(() => {
@@ -261,11 +319,10 @@ const SetupPage = () => {
       const userData = {
         ...cleanFormData,
         setupComplete: true,
-        createdAt: new Date(),
         updatedAt: new Date(),
       };
 
-      // Send data to API endpoint instead of direct Firestore access
+      // Send data to API endpoint
       const response = await fetch("/api/firebase", {
         method: "POST",
         headers: {
@@ -291,6 +348,15 @@ const SetupPage = () => {
       alert("An error occurred while saving your profile");
     }
   };
+
+  // Show loading state while fetching initial data
+  if (!dataFetched) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen py-12 px-4">
@@ -365,6 +431,33 @@ const SetupPage = () => {
                   />
                 </div>
               )}
+            </div>
+          </div>
+
+          {/* Social Media Links */}
+          <div className="space-y-6 mb-8">
+            <h2 className="text-2xl font-semibold text-[#4b2e83] border-b pb-2">
+              Social Media Links
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input
+                label="LinkedIn Profile"
+                value={formData.linkedin}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, linkedin: e.target.value }))
+                }
+                placeholder="https://linkedin.com/in/your-profile"
+                className="w-full"
+              />
+              <Input
+                label="Instagram Profile"
+                value={formData.instagram}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, instagram: e.target.value }))
+                }
+                placeholder="https://instagram.com/your-profile"
+                className="w-full"
+              />
             </div>
           </div>
 
