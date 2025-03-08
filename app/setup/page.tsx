@@ -252,13 +252,49 @@ const SetupPage = () => {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Check file size (limit to 500KB)
+      if (file.size > 500000) {
+        alert("Image size should be less than 500KB");
+        return;
+      }
+
       const reader = new FileReader();
       reader.onloadend = () => {
-        setFormData((prev) => ({
-          ...prev,
-          image: file,
-          imagePreview: reader.result as string,
-        }));
+        // Resize image before storing
+        const img = new Image();
+        img.src = reader.result as string;
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const MAX_WIDTH = 200;
+          const MAX_HEIGHT = 200;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          ctx?.drawImage(img, 0, 0, width, height);
+
+          const resizedBase64 = canvas.toDataURL("image/jpeg", 0.7);
+
+          setFormData((prev) => ({
+            ...prev,
+            image: null, // We don't need to store the File object anymore
+            imagePreview: resizedBase64,
+          }));
+        };
       };
       reader.readAsDataURL(file);
     }
@@ -312,12 +348,13 @@ const SetupPage = () => {
         return;
       }
 
-      // Create a clean version of formData without File object and imagePreview
-      const { image: _, imagePreview: __, ...cleanFormData } = formData;
+      // Create a clean version of formData
+      const { image: _, ...cleanFormData } = formData;
 
-      // Prepare user data
+      // Use imagePreview directly as the imageUrl
       const userData = {
         ...cleanFormData,
+        imageUrl: formData.imagePreview || "", // Use the base64 string directly
         setupComplete: true,
         updatedAt: new Date(),
       };
@@ -453,7 +490,10 @@ const SetupPage = () => {
                 label="Instagram Profile"
                 value={formData.instagram}
                 onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, instagram: e.target.value }))
+                  setFormData((prev) => ({
+                    ...prev,
+                    instagram: e.target.value,
+                  }))
                 }
                 placeholder="https://instagram.com/your-profile"
                 className="w-full"

@@ -1,36 +1,40 @@
+"use client";
+
 import "@/styles/globals.css";
-import { Metadata, Viewport } from "next";
 import clsx from "clsx";
+import { useEffect, useState } from "react";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "@/app/firebase/config";
 
 import { Providers } from "./providers";
 
-import { siteConfig } from "@/config/site";
 import { fontSans } from "@/config/fonts";
 import { HomeNavbar } from "@/components/homeNavbar";
+import { Navbar } from "@/components/navbar";
 
-export const metadata: Metadata = {
-  title: {
-    default: siteConfig.name,
-    template: `%s - ${siteConfig.name}`,
-  },
-  description: siteConfig.description,
-  icons: {
-    icon: "/favicon.ico",
-  },
-};
-
-export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "white" },
-    { media: "(prefers-color-scheme: dark)", color: "black" },
-  ],
-};
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setIsAuthenticated(!!user);
+      setIsLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Show nothing while checking auth status to prevent flash of wrong navbar
+  if (isLoading) {
+    return null;
+  }
+
   return (
     <html suppressHydrationWarning lang="en">
       <head />
@@ -42,16 +46,16 @@ export default function RootLayout({
       >
         <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
           <div className="relative flex flex-col h-screen">
-            <HomeNavbar />
+            {isAuthenticated ? <Navbar /> : <HomeNavbar />}
             <main className="container mx-auto max-w-7xl pt-16 px-6 flex-grow">
               {children}
             </main>
-            <footer className="fixed bottom-0 w-full flex items-center justify-center py-3 bg-white/5 backdrop-blur-sm border-t border-white/10 shadow-lg z-50">
+            {/* <footer className="fixed bottom-0 w-full flex items-center justify-center py-3 bg-white/5 backdrop-blur-sm border-t border-white/10 shadow-lg z-50">
               <p>
-                💜©INFO 442: Group 5 (Sirak Yohannes, Aaron Jones, Christopher
-                May Chen, Mykyta Lepikash, Sid Jayadev)💜
+                ©INFO 442: Group 5 (Sirak Yohannes, Aaron Jones, Christopher
+                May Chen, Mykyta Lepikash, Sid Jayadev)
               </p>
-            </footer>
+            </footer> */}
           </div>
         </Providers>
       </body>

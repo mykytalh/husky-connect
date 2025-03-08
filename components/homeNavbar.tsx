@@ -58,7 +58,7 @@ export const HomeNavbar = () => {
               />
             </button>
           ) : (
-            <Link href="/" className="flex items-center gap-2">
+            <Link href="/dashboard" className="flex items-center gap-2">
               <span className="text-2xl font-bold bg-gradient-to-r from-[#4b2e83] to-[#85754d] text-transparent bg-clip-text">
                 Husky Connect
               </span>
