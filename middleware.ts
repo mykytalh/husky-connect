@@ -1,53 +1,72 @@
 import type { NextRequest } from "next/server";
-
 import { NextResponse } from "next/server";
 
-// Routes that require authentication
-const protectedPaths = ["/dashboard", "/about"];
-
-// Routes that are ONLY for non-authenticated users
-const publicOnlyPaths = ["/", "/login", "/register"];
-
-// Routes exempt from setup requirement
-const setupExemptPaths = ["/setup"];
+// Define route groups
+const PUBLIC_ROUTES = new Set(["/", "/login", "/register"]);
+const PROTECTED_ROUTES = new Set(["/dashboard", "/about", "/setup"]);
+const SETUP_EXEMPT_ROUTES = new Set(["/setup"]);
+const STATIC_ROUTES = new Set([
+  "/favicon.ico",
+  "/_next",
+  "/api",
+  "/images",
+  "/assets",
+]);
 
 export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // Skip middleware for static files and API routes
+  if (
+    STATIC_ROUTES.has(pathname) ||
+    pathname.startsWith("/api") ||
+    pathname.startsWith("/_next")
+  ) {
+    return NextResponse.next();
+  }
+
   const token = request.cookies.get("auth-token")?.value;
   const setupComplete = request.cookies.get("setup-complete")?.value;
-  const path = request.nextUrl.pathname;
 
-  // If user is authenticated (has token)
+  // User is authenticated
   if (token) {
-    // Prevent authenticated users from accessing public-only routes
-    if (publicOnlyPaths.includes(path)) {
+    // Redirect from public routes to dashboard
+    if (PUBLIC_ROUTES.has(pathname)) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
 
-    // Check setup completion for non-exempt routes
-    if (!setupComplete && !setupExemptPaths.includes(path)) {
+    // Check setup completion
+    if (!setupComplete && !SETUP_EXEMPT_ROUTES.has(pathname)) {
       return NextResponse.redirect(new URL("/setup", request.url));
     }
 
     return NextResponse.next();
   }
 
-  // If user is NOT authenticated (no token)
-  if (!token && protectedPaths.includes(path)) {
-    return NextResponse.redirect(new URL("/", request.url));
+  // User is not authenticated
+  if (!token) {
+    // Allow access to public routes
+    if (PUBLIC_ROUTES.has(pathname)) {
+      return NextResponse.next();
+    }
+
+    // Redirect to home page for protected routes
+    if (PROTECTED_ROUTES.has(pathname)) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
   }
 
   return NextResponse.next();
 }
 
-// Configure which paths the middleware should run on
 export const config = {
   matcher: [
-    "/",
-    "/login",
-    "/register",
-    "/setup",
-    "/dashboard",
-    "/about",
+    /*
+     * Match all request paths except:
+     * 1. /api/ (API routes)
+     * 2. /_next/ (Next.js internals)
+     * 3. /favicon.ico, /sitemap.xml (static files)
+     */
     "/((?!api|_next/static|_next/image|favicon.ico).*)",
   ],
 };
