@@ -57,7 +57,7 @@ const CourseSelector = ({
     .filter(
       (c) =>
         c.code.toLowerCase().includes(search.toLowerCase()) ||
-        c.name.toLowerCase().includes(search.toLowerCase()),
+        c.name.toLowerCase().includes(search.toLowerCase())
     )
     .slice(0, displayLimit);
 
@@ -165,7 +165,7 @@ export default function CreatePost() {
 
   // Add states for majors and courses
   const [majors, setMajors] = useState<Array<{ code: string; name: string }>>(
-    [],
+    []
   );
   const [courses, setCourses] = useState<Course[]>([]);
   const [majorSearch, setMajorSearch] = useState("");
@@ -178,7 +178,7 @@ export default function CreatePost() {
     try {
       // Fetch majors
       const majorsRes = await fetch(
-        `/api/majors?campus=${encodeURIComponent(campus)}&type=majors`,
+        `/api/majors?campus=${encodeURIComponent(campus)}&type=majors`
       );
 
       if (!majorsRes.ok)
@@ -188,21 +188,21 @@ export default function CreatePost() {
         ([code, name]) => ({
           code,
           name: name as string,
-        }),
+        })
       );
 
       setMajors(majorsList);
 
       // Fetch courses
       const coursesRes = await fetch(
-        `/api/courses?campus=${encodeURIComponent(campus)}&type=courses`,
+        `/api/courses?campus=${encodeURIComponent(campus)}&type=courses`
       );
 
       if (!coursesRes.ok)
         throw new Error(`Failed to fetch courses: ${coursesRes.statusText}`);
       const coursesData = await coursesRes.json();
       const coursesList: Course[] = Object.entries(
-        coursesData.courses || {},
+        coursesData.courses || {}
       ).map(([code, data]: [string, any]) => ({
         code,
         name: data["Course Name"] ? data["Course Name"] : code,
@@ -220,7 +220,7 @@ export default function CreatePost() {
 
   // Filter majors based on search
   const filteredMajors = majors.filter((m) =>
-    m.name.toLowerCase().includes(majorSearch.toLowerCase()),
+    m.name.toLowerCase().includes(majorSearch.toLowerCase())
   );
 
   useEffect(() => {
@@ -259,14 +259,8 @@ export default function CreatePost() {
 
   const handleSubmitPost = async () => {
     if (!currentUser) return;
-    if (
-      !newPost.title ||
-      !newPost.content ||
-      !newPost.campus ||
-      !newPost.major
-    ) {
-      alert("Please fill in all required fields");
-
+    if (!newPost.title || !newPost.content) {
+      alert("Please fill in the title and content");
       return;
     }
 
@@ -283,9 +277,9 @@ export default function CreatePost() {
           userImage: currentUser.imageUrl,
           title: newPost.title,
           content: newPost.content,
-          campus: newPost.campus,
-          major: newPost.major,
-          course: newPost.course,
+          campus: newPost.campus || null,
+          major: newPost.major || null,
+          course: newPost.course || null,
           createdAt: Date.now(),
         }),
       });
@@ -315,19 +309,18 @@ export default function CreatePost() {
         <div className="space-y-6">
           <Input
             className="w-full"
-            label="Title"
+            label="Title *"
             placeholder="What's on your mind?"
             value={newPost.title}
             onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
           />
 
-          {/* Campus Selection */}
+          {/* Campus Selection - Optional */}
           <select
             className="w-full rounded-lg border-gray-300 focus:border-purple-500 focus:ring-purple-500 p-2"
             value={newPost.campus}
             onChange={(e) => {
               const selectedCampus = e.target.value;
-
               setNewPost({
                 ...newPost,
                 campus: selectedCampus,
@@ -340,21 +333,23 @@ export default function CreatePost() {
               }
             }}
           >
-            <option value="">Select Campus</option>
+            <option value="">Select Campus (Optional)</option>
             <option value="Seattle">Seattle</option>
             <option value="Bothell">Bothell</option>
             <option value="Tacoma">Tacoma</option>
           </select>
 
-          {/* Major Selection */}
+          {/* Major Selection - Optional */}
           <div className="relative">
             <div className="relative">
               <Input
                 className="w-full"
                 disabled={!newPost.campus || isLoadingData}
-                label="Major"
+                label="Major (Optional)"
                 placeholder={
-                  isLoadingData ? "Loading majors..." : "Search for your major"
+                  isLoadingData
+                    ? "Loading majors..."
+                    : "Search for your major (Optional)"
                 }
                 value={majorSearch}
                 onChange={(e) => {
@@ -413,18 +408,23 @@ export default function CreatePost() {
             )}
           </div>
 
-          {/* Course Selection */}
-          <CourseSelector
-            courses={courses}
-            value={newPost.course}
-            onSelect={(selectedCourse) =>
-              setNewPost((prev) => ({ ...prev, course: selectedCourse.code }))
-            }
-          />
+          {/* Course Selection - Optional */}
+          <div className="mb-4">
+            <CourseSelector
+              courses={courses}
+              value={newPost.course}
+              onSelect={(selectedCourse) =>
+                setNewPost((prev) => ({ ...prev, course: selectedCourse.code }))
+              }
+            />
+            <p className="text-sm text-gray-500 mt-1">
+              Optional: Select a related course
+            </p>
+          </div>
 
           <Textarea
             className="w-full"
-            label="Content"
+            label="Content *"
             minRows={5}
             placeholder="Share your thoughts..."
             value={newPost.content}
@@ -433,9 +433,11 @@ export default function CreatePost() {
             }
           />
 
+          <div className="text-sm text-gray-500 mb-4">* Required fields</div>
+
           <Button
             className="w-full bg-gradient-to-r from-[#4b2e83] to-[#85754d] text-white py-3 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
-            disabled={isLoading}
+            disabled={isLoading || !newPost.title || !newPost.content}
             onClick={handleSubmitPost}
           >
             {isLoading ? "Creating..." : "Create Post"}

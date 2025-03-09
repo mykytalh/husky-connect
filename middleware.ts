@@ -29,20 +29,16 @@ export function middleware(request: NextRequest) {
 
   // User is authenticated
   if (token) {
-    // Always redirect from public routes to dashboard when authenticated
+    // Redirect from public routes to dashboard when authenticated
     if (PUBLIC_ROUTES.has(pathname)) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
 
     // Check setup status for protected routes
     if (PROTECTED_ROUTES.has(pathname)) {
-      // If setup is not complete and trying to access anything other than setup page
-      if (setupComplete === "false" && pathname !== "/setup") {
+      // Only redirect to setup if setup is not complete and trying to access dashboard or about
+      if (setupComplete === "false" && pathname !== "/setup" && (pathname === "/dashboard" || pathname === "/about")) {
         return NextResponse.redirect(new URL("/setup", request.url));
-      }
-      // If setup is complete and trying to access setup page
-      if (setupComplete === "true" && pathname === "/setup") {
-        return NextResponse.redirect(new URL("/dashboard", request.url));
       }
       return NextResponse.next();
     }
@@ -63,12 +59,6 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except:
-     * 1. /api/ (API routes)
-     * 2. /_next/ (Next.js internals)
-     * 3. /favicon.ico, /sitemap.xml (static files)
-     */
     "/((?!api|_next/static|_next/image|favicon.ico).*)",
   ],
 };
