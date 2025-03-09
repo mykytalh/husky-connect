@@ -27,7 +27,7 @@ const Page = () => {
       );
 
       if (userCredential.user) {
-        router.push("/");
+        router.push("/dashboard");
       }
     } catch (err: any) {
       setError(err.message);
