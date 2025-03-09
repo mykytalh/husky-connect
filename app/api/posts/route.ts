@@ -12,11 +12,9 @@ export async function GET() {
 
     return NextResponse.json(posts);
   } catch (error) {
-    console.error("Error fetching posts:", error);
-
     return NextResponse.json(
       { error: "Failed to fetch posts" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -29,11 +27,9 @@ export async function POST(request: Request) {
 
     return NextResponse.json(newPost);
   } catch (error) {
-    console.error("Error creating post:", error);
-
     return NextResponse.json(
       { error: "Failed to create post" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -47,7 +43,7 @@ export async function DELETE(request: Request) {
     if (!postId || !userId) {
       return NextResponse.json(
         { error: "Missing post ID or user ID" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -65,11 +61,9 @@ export async function DELETE(request: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting post:", error);
-
     return NextResponse.json(
       { error: "Failed to delete post" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

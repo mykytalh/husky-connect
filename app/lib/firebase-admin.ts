@@ -24,10 +24,8 @@ try {
       credential: cert(serviceAccount),
       projectId: process.env.FIREBASE_PROJECT_ID,
     });
-    console.log("Firebase Admin initialized successfully");
   }
 } catch (error) {
-  console.error("Error initializing Firebase Admin:", error);
   throw error;
 }
 
