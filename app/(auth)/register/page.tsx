@@ -1,6 +1,5 @@
 "use client";
 
-import { auth } from "@/app/firebase/config";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -9,6 +8,8 @@ import { Button } from "@heroui/button";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import Link from "next/link";
 import React from "react";
+
+import { auth } from "@/app/firebase/config";
 
 const Page = () => {
   const [email, setEmail] = useState("");
@@ -22,8 +23,9 @@ const Page = () => {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
-        password
+        password,
       );
+
       if (userCredential.user) {
         router.push("/setup"); // Redirect to home page after successful registration
       }
@@ -54,18 +56,18 @@ const Page = () => {
           )}
         </CardHeader>
         <CardBody>
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 Email address
               </label>
               <Input
+                required
+                className="w-full"
+                placeholder="your.email@uw.edu"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="your.email@uw.edu"
-                className="w-full"
-                required
               />
             </div>
             <div className="space-y-2">
@@ -73,25 +75,25 @@ const Page = () => {
                 Password
               </label>
               <Input
+                required
+                className="w-full"
+                placeholder="••••••••"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full"
-                required
               />
             </div>
             <Button
-              type="submit"
               className="w-full bg-gradient-to-r from-[#4b2e83] to-[#85754d] text-white shadow-lg hover:opacity-90 transform hover:scale-105 transition-all duration-300"
+              type="submit"
             >
               Sign up
             </Button>
             <div className="text-center text-sm text-gray-600 dark:text-gray-400">
               Already have an account?{" "}
               <Link
-                href="/login"
                 className="font-medium bg-gradient-to-r from-[#4b2e83] to-[#85754d] text-transparent bg-clip-text hover:opacity-80"
+                href="/login"
               >
                 Log in
               </Link>

@@ -1,6 +1,9 @@
 <<<<<<< HEAD
+
 # husky-connect
+
 =======
+
 # Next.js & HeroUI Template
 
 This is a template for creating applications using Next.js 14 (app directory) and HeroUI (v2).
@@ -54,4 +57,5 @@ After modifying the `.npmrc` file, you need to run `pnpm install` again to ensur
 ## License
 
 Licensed under the [MIT license](https://github.com/heroui-inc/next-app-template/blob/main/LICENSE).
->>>>>>> f695875 (Initial commit from Create Next App)
+
+> > > > > > > f695875 (Initial commit from Create Next App)

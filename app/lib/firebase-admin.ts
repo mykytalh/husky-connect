@@ -1,6 +1,7 @@
+import type { ServiceAccount } from "firebase-admin";
+
 import { initializeApp, getApps, cert } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
-import type { ServiceAccount } from "firebase-admin";
 
 // Check for required environment variables
 if (

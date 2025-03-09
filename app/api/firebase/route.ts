@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+
 import { adminDb } from "@/app/lib/firebase-admin";
 
 export async function GET(request: Request) {
@@ -8,9 +9,10 @@ export async function GET(request: Request) {
 
     if (!uid) {
       console.error("Missing UID in request");
+
       return NextResponse.json(
         { error: "User ID is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -19,17 +21,21 @@ export async function GET(request: Request) {
 
     if (!userDoc.exists) {
       console.log(`No user found for UID: ${uid}`);
+
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     const userData = userDoc.data();
+
     console.log(`Successfully fetched user data for UID: ${uid}`);
+
     return NextResponse.json(userData);
   } catch (error) {
     console.error("Error fetching user data:", error);
+
     return NextResponse.json(
       { error: "Failed to fetch user data" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -40,9 +46,10 @@ export async function POST(request: Request) {
 
     if (!uid || !userData) {
       console.error("Missing required fields in POST request");
+
       return NextResponse.json(
         { error: "User ID and data are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -53,9 +60,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error saving user data:", error);
+
     return NextResponse.json(
       { error: "Failed to save user data" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

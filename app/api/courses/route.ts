@@ -17,6 +17,7 @@ export async function GET(request: Request) {
 
   try {
     const response = await fetch(`${API_BASE_URL}/${type}/${campus}`);
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -30,9 +31,10 @@ export async function GET(request: Request) {
     return NextResponse.json(data);
   } catch (error) {
     console.error("API Error:", error);
+
     return NextResponse.json(
       { error: "Failed to fetch data", details: (error as Error).message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

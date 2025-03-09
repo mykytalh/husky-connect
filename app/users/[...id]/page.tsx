@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
+
 import { auth } from "@/app/firebase/config";
 
 interface UserProfile {
@@ -33,8 +34,10 @@ export default function UserProfilePage() {
     const fetchUserData = async () => {
       try {
         const response = await fetch(`/api/firebase?uid=${userId}`);
+
         if (!response.ok) throw new Error("Failed to fetch user data");
         const data = await response.json();
+
         setUser(data);
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -52,13 +55,14 @@ export default function UserProfilePage() {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       setCurrentUserId(user?.uid || null);
     });
+
     return () => unsubscribe();
   }, []);
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-white">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500" />
       </div>
     );
   }
@@ -80,9 +84,9 @@ export default function UserProfilePage() {
             {/* Profile Picture */}
             {user.imageUrl ? (
               <img
-                src={user.imageUrl}
                 alt={user.name}
                 className="w-40 h-40 rounded-full object-cover ring-4 ring-purple-100"
+                src={user.imageUrl}
               />
             ) : (
               <div className="w-40 h-40 rounded-full bg-gradient-to-r from-[#4b2e83] to-[#85754d] flex items-center justify-center text-5xl text-white ring-4 ring-purple-100">
@@ -98,7 +102,8 @@ export default function UserProfilePage() {
               <p className="text-2xl text-gray-600 mt-2">{user.major}</p>
               {user.campus && (
                 <p className="text-gray-500 mt-1 flex items-center gap-2 justify-center md:justify-start">
-                  <span className="animate-bounce">📍</span> {user.campus} Campus
+                  <span className="animate-bounce">📍</span> {user.campus}{" "}
+                  Campus
                 </p>
               )}
 
@@ -106,10 +111,10 @@ export default function UserProfilePage() {
               <div className="flex flex-wrap gap-4 mt-4 justify-center md:justify-start">
                 {user.linkedin && (
                   <a
-                    href={user.linkedin}
-                    target="_blank"
-                    rel="noopener noreferrer"
                     className="px-4 py-2 bg-blue-50 text-blue-600 rounded-full hover:bg-blue-100 transition-all flex items-center gap-2 group"
+                    href={user.linkedin}
+                    rel="noopener noreferrer"
+                    target="_blank"
                   >
                     <svg
                       className="w-5 h-5 group-hover:scale-110 transition-transform"
@@ -123,10 +128,10 @@ export default function UserProfilePage() {
                 )}
                 {user.instagram && (
                   <a
-                    href={user.instagram}
-                    target="_blank"
-                    rel="noopener noreferrer"
                     className="px-4 py-2 bg-pink-50 text-pink-600 rounded-full hover:bg-pink-100 transition-all flex items-center gap-2 group"
+                    href={user.instagram}
+                    rel="noopener noreferrer"
+                    target="_blank"
                   >
                     <svg
                       className="w-5 h-5 group-hover:scale-110 transition-transform"
@@ -148,12 +153,16 @@ export default function UserProfilePage() {
           <div className="md:col-span-1 space-y-8">
             {/* Academic Info Card */}
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-              <h2 className="text-xl font-semibold mb-4 text-gray-800">Academic Info</h2>
+              <h2 className="text-xl font-semibold mb-4 text-gray-800">
+                Academic Info
+              </h2>
               <div className="space-y-4">
                 {user.classStanding && (
                   <div>
                     <h3 className="text-sm text-gray-500">Class Standing</h3>
-                    <p className="text-lg text-gray-700">{user.classStanding}</p>
+                    <p className="text-lg text-gray-700">
+                      {user.classStanding}
+                    </p>
                   </div>
                 )}
                 {user.degreeType && (
@@ -177,7 +186,9 @@ export default function UserProfilePage() {
             {/* Bio Card */}
             {user.bio && (
               <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                <h2 className="text-xl font-semibold mb-4 text-gray-800">About</h2>
+                <h2 className="text-xl font-semibold mb-4 text-gray-800">
+                  About
+                </h2>
                 <p className="text-gray-600 whitespace-pre-wrap leading-relaxed">
                   {user.bio}
                 </p>
@@ -187,7 +198,9 @@ export default function UserProfilePage() {
             {/* Current Courses Card */}
             {user.currentCourses?.length > 0 && (
               <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                <h2 className="text-xl font-semibold mb-4 text-gray-800">Current Courses</h2>
+                <h2 className="text-xl font-semibold mb-4 text-gray-800">
+                  Current Courses
+                </h2>
                 <div className="flex flex-wrap gap-2">
                   {user.currentCourses.map((course) => (
                     <span
@@ -204,7 +217,9 @@ export default function UserProfilePage() {
             {/* Study Preferences Card */}
             {user.studyPreferences && user.studyPreferences.length > 0 && (
               <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                <h2 className="text-xl font-semibold mb-4 text-gray-800">Study Preferences</h2>
+                <h2 className="text-xl font-semibold mb-4 text-gray-800">
+                  Study Preferences
+                </h2>
                 <div className="flex flex-wrap gap-2">
                   {user.studyPreferences.map((pref, index) => (
                     <span

@@ -17,16 +17,19 @@ export async function GET(request: Request) {
 
   try {
     const response = await fetch(`${API_BASE_URL}/majors/${campus}`);
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const data = await response.json();
+
     return NextResponse.json(data);
   } catch (error) {
     console.error("API Error:", error);
+
     return NextResponse.json(
       { error: "Failed to fetch majors" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -4,14 +4,13 @@ import "@/styles/globals.css";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "@/app/firebase/config";
 
 import { Providers } from "./providers";
 
+import { auth } from "@/app/firebase/config";
 import { fontSans } from "@/config/fonts";
 import { HomeNavbar } from "@/components/homeNavbar";
 import { Navbar } from "@/components/navbar";
-
 
 export default function RootLayout({
   children,
@@ -41,7 +40,7 @@ export default function RootLayout({
       <body
         className={clsx(
           "min-h-screen bg-background font-sans antialiased",
-          fontSans.variable
+          fontSans.variable,
         )}
       >
         <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
@@ -55,7 +54,7 @@ export default function RootLayout({
                 ©INFO 442: Group 5 (Sirak Yohannes, Aaron Jones, Christopher
                 May Chen, Mykyta Lepikash, Sid Jayadev)
               </p>
-            </footer> 
+            </footer>
           </div>
         </Providers>
       </body>

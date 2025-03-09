@@ -1,10 +1,11 @@
 "use client";
 
 import { Link } from "@heroui/link";
-import { title, subtitle } from "@/components/primitives";
-
 import { useAuthState } from "react-firebase-hooks/auth";
+
 import { auth } from "./firebase/config";
+
+import { title, subtitle } from "@/components/primitives";
 
 export default function Home() {
   const [user] = useAuthState(auth);
@@ -48,8 +49,8 @@ export default function Home() {
 
           <div className="mt-12 flex gap-6 justify-center">
             <Link
-              href="/register"
               className="px-8 py-3 text-lg font-semibold text-white bg-gradient-to-r from-[#4b2e83] to-[#85754d] rounded-full hover:opacity-90 transform hover:scale-105 transition-all duration-300 shadow-lg"
+              href="/register"
             >
               Get Started
             </Link>

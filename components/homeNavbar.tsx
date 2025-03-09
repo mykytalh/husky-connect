@@ -4,8 +4,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { onAuthStateChanged, signOut } from "firebase/auth";
-import { auth } from "@/app/firebase/config";
 import Cookies from "js-cookie";
+
+import { auth } from "@/app/firebase/config";
 
 export const HomeNavbar = () => {
   const router = useRouter();
@@ -45,27 +46,27 @@ export const HomeNavbar = () => {
           {/* Logo - Now conditionally handles click */}
           {isAuthenticated ? (
             <button
-              onClick={handleLogout}
               className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+              onClick={handleLogout}
             >
               <span className="text-2xl font-bold bg-gradient-to-r from-[#4b2e83] to-[#85754d] text-transparent bg-clip-text">
                 Husky Connect
               </span>
               <img
-                src="https://static.wixstatic.com/media/8cac10_4cab2aa83fe642599baea451dacc96c3~mv2.png/v1/fill/w_560,h_418,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/uw%20logo.png"
                 alt="UW Logo"
                 className="h-8 w-8"
+                src="https://static.wixstatic.com/media/8cac10_4cab2aa83fe642599baea451dacc96c3~mv2.png/v1/fill/w_560,h_418,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/uw%20logo.png"
               />
             </button>
           ) : (
-            <Link href="/dashboard" className="flex items-center gap-2">
+            <Link className="flex items-center gap-2" href="/dashboard">
               <span className="text-2xl font-bold bg-gradient-to-r from-[#4b2e83] to-[#85754d] text-transparent bg-clip-text">
                 Husky Connect
               </span>
               <img
-                src="https://static.wixstatic.com/media/8cac10_4cab2aa83fe642599baea451dacc96c3~mv2.png/v1/fill/w_560,h_418,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/uw%20logo.png"
                 alt="UW Logo"
                 className="h-8 w-8"
+                src="https://static.wixstatic.com/media/8cac10_4cab2aa83fe642599baea451dacc96c3~mv2.png/v1/fill/w_560,h_418,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/uw%20logo.png"
               />
             </Link>
           )}
@@ -73,15 +74,15 @@ export const HomeNavbar = () => {
           {/* Right side - Conditional rendering based on auth state */}
           {isAuthenticated ? (
             <button
-              onClick={handleLogout}
               className="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600 transition-all shadow-md"
+              onClick={handleLogout}
             >
               Log Out
             </button>
           ) : (
             <Link
-              href="/register"
               className="bg-gradient-to-r from-[#4b2e83] to-[#85754d] text-white px-6 py-2 rounded-md hover:opacity-90 transition-all shadow-md"
+              href="/register"
             >
               Get Started
             </Link>

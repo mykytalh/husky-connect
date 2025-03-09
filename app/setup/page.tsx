@@ -6,8 +6,9 @@ import { Button } from "@heroui/button";
 import { Card } from "@heroui/card";
 import { Textarea } from "@heroui/input";
 import { useRouter } from "next/navigation";
-import { auth } from "@/app/firebase/config";
 import Cookies from "js-cookie";
+
+import { auth } from "@/app/firebase/config";
 
 interface Course {
   code: string;
@@ -32,7 +33,7 @@ const CourseSelector = ({
     .filter(
       (c) =>
         c.code.toLowerCase().includes(search.toLowerCase()) ||
-        c.name.toLowerCase().includes(search.toLowerCase())
+        c.name.toLowerCase().includes(search.toLowerCase()),
     )
     .slice(0, displayLimit); // Limit the number of displayed results
 
@@ -44,7 +45,14 @@ const CourseSelector = ({
   return (
     <div className="relative">
       <Input
+        className="w-full"
+        disabled={courses.length === 0}
         label="Course"
+        placeholder={
+          courses.length === 0
+            ? "Loading courses..."
+            : "Search for a course (e.g., CSE 142, Computer Programming)"
+        }
         value={search || value}
         onChange={(e) => {
           setSearch(e.target.value);
@@ -52,30 +60,23 @@ const CourseSelector = ({
           setDisplayLimit(50); // Reset display limit when search changes
         }}
         onFocus={() => setDropdownOpen(true)}
-        placeholder={
-          courses.length === 0
-            ? "Loading courses..."
-            : "Search for a course (e.g., CSE 142, Computer Programming)"
-        }
-        disabled={courses.length === 0}
-        className="w-full"
       />
       {dropdownOpen && (
         <div
-          id="course-dropdown"
           className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto"
+          id="course-dropdown"
         >
           {filteredCourses.length > 0 ? (
             <>
               {filteredCourses.map((c) => (
                 <div
                   key={c.code}
+                  className="cursor-pointer p-2 hover:bg-gray-100"
                   onClick={() => {
                     onSelect(c);
                     setSearch(""); // reset search after selection
                     setDropdownOpen(false);
                   }}
-                  className="cursor-pointer p-2 hover:bg-gray-100"
                 >
                   <div className="font-medium">{c.code}</div>
                   <div className="text-sm text-gray-600">{c.name}</div>
@@ -128,7 +129,7 @@ const SetupPage = () => {
   });
 
   const [majors, setMajors] = useState<Array<{ code: string; name: string }>>(
-    []
+    [],
   );
   const [courses, setCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -140,8 +141,10 @@ const SetupPage = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       const user = auth.currentUser;
+
       if (!user) {
         router.push("/");
+
         return;
       }
 
@@ -175,6 +178,7 @@ const SetupPage = () => {
             // Set major search to display the selected major
             if (data.major) {
               const majorData = majors.find((m) => m.code === data.major);
+
               if (majorData) {
                 setMajorSearch(majorData.name);
               }
@@ -195,12 +199,14 @@ const SetupPage = () => {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const dropdown = document.getElementById("major-dropdown");
+
       if (dropdown && !dropdown.contains(event.target as Node)) {
         setIsMajorDropdownOpen(false);
       }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
+
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
@@ -210,8 +216,9 @@ const SetupPage = () => {
     try {
       // Fetch majors
       const majorsRes = await fetch(
-        `/api/majors?campus=${encodeURIComponent(campus)}&type=majors`
+        `/api/majors?campus=${encodeURIComponent(campus)}&type=majors`,
       );
+
       if (!majorsRes.ok) {
         throw new Error(`Failed to fetch majors: ${majorsRes.statusText}`);
       }
@@ -220,25 +227,28 @@ const SetupPage = () => {
         ([code, name]) => ({
           code,
           name: name as string,
-        })
+        }),
       );
+
       setMajors(majorsList);
 
       // Fetch courses using your endpoint
       const coursesRes = await fetch(
-        `/api/courses?campus=${encodeURIComponent(campus)}&type=courses`
+        `/api/courses?campus=${encodeURIComponent(campus)}&type=courses`,
       );
+
       if (!coursesRes.ok) {
         throw new Error(`Failed to fetch courses: ${coursesRes.statusText}`);
       }
       const coursesData = await coursesRes.json();
       // Convert the courses object into an array of { code, name }
       const coursesList: Course[] = Object.entries(
-        coursesData.courses || {}
+        coursesData.courses || {},
       ).map(([code, data]: [string, any]) => ({
         code,
         name: data["Course Name"] ? data["Course Name"] : code,
       }));
+
       setCourses(coursesList);
     } catch (error) {
       console.error("Failed to fetch program data:", error);
@@ -251,17 +261,21 @@ const SetupPage = () => {
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+
     if (file) {
       // Check file size (limit to 500KB)
       if (file.size > 500000) {
         alert("Image size should be less than 500KB");
+
         return;
       }
 
       const reader = new FileReader();
+
       reader.onloadend = () => {
         // Resize image before storing
         const img = new Image();
+
         img.src = reader.result as string;
         img.onload = () => {
           const canvas = document.createElement("canvas");
@@ -285,6 +299,7 @@ const SetupPage = () => {
           canvas.width = width;
           canvas.height = height;
           const ctx = canvas.getContext("2d");
+
           ctx?.drawImage(img, 0, 0, width, height);
 
           const resizedBase64 = canvas.toDataURL("image/jpeg", 0.7);
@@ -331,20 +346,23 @@ const SetupPage = () => {
 
   // Filter majors based on the search input (case-insensitive)
   const filteredMajors = majors.filter((m) =>
-    m.name.toLowerCase().includes(majorSearch.toLowerCase())
+    m.name.toLowerCase().includes(majorSearch.toLowerCase()),
   );
 
   const handleSubmit = async () => {
     // Validate required fields
     if (!formData.name || !formData.campus || !formData.major) {
       alert("Please fill in all required fields");
+
       return;
     }
 
     try {
       const user = auth.currentUser;
+
       if (!user) {
         router.push("/");
+
         return;
       }
 
@@ -390,7 +408,7 @@ const SetupPage = () => {
   if (!dataFetched) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500" />
       </div>
     );
   }
@@ -414,11 +432,12 @@ const SetupPage = () => {
               {formData.imagePreview ? (
                 <div className="relative w-full h-full">
                   <img
-                    src={formData.imagePreview}
                     alt="Profile preview"
                     className="w-full h-full object-cover rounded-full border-4 border-purple-200"
+                    src={formData.imagePreview}
                   />
                   <button
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-2 hover:bg-red-600 transition-colors"
                     onClick={() =>
                       setFormData((prev) => ({
                         ...prev,
@@ -426,18 +445,17 @@ const SetupPage = () => {
                         imagePreview: "",
                       }))
                     }
-                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-2 hover:bg-red-600 transition-colors"
                   >
                     <svg
-                      xmlns="http://www.w3.org/2000/svg"
                       className="h-4 w-4"
-                      viewBox="0 0 20 20"
                       fill="currentColor"
+                      viewBox="0 0 20 20"
+                      xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
-                        fillRule="evenodd"
-                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
                         clipRule="evenodd"
+                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                        fillRule="evenodd"
                       />
                     </svg>
                   </button>
@@ -447,24 +465,24 @@ const SetupPage = () => {
                   <div className="text-center">
                     <svg
                       className="mx-auto h-12 w-12 text-purple-400"
-                      stroke="currentColor"
                       fill="none"
+                      stroke="currentColor"
                       viewBox="0 0 48 48"
                     >
                       <path
                         d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                        strokeWidth="2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
+                        strokeWidth="2"
                       />
                     </svg>
                     <p className="mt-2 text-sm text-purple-600">Upload Photo</p>
                   </div>
                   <input
-                    type="file"
                     accept="image/*"
-                    onChange={handleImageUpload}
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    type="file"
+                    onChange={handleImageUpload}
                   />
                 </div>
               )}
@@ -478,16 +496,18 @@ const SetupPage = () => {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input
+                className="w-full"
                 label="LinkedIn Profile"
+                placeholder="https://linkedin.com/in/your-profile"
                 value={formData.linkedin}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, linkedin: e.target.value }))
                 }
-                placeholder="https://linkedin.com/in/your-profile"
-                className="w-full"
               />
               <Input
+                className="w-full"
                 label="Instagram Profile"
+                placeholder="https://instagram.com/your-profile"
                 value={formData.instagram}
                 onChange={(e) =>
                   setFormData((prev) => ({
@@ -495,8 +515,6 @@ const SetupPage = () => {
                     instagram: e.target.value,
                   }))
                 }
-                placeholder="https://instagram.com/your-profile"
-                className="w-full"
               />
             </div>
           </div>
@@ -508,23 +526,23 @@ const SetupPage = () => {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input
+                className="w-full"
                 label="Name"
+                placeholder="Your full name"
                 value={formData.name}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, name: e.target.value }))
                 }
-                placeholder="Your full name"
-                className="w-full"
               />
               <Input
+                className="w-full"
                 label="Age"
+                placeholder="Your age"
                 type="number"
                 value={formData.age}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, age: e.target.value }))
                 }
-                placeholder="Your age"
-                className="w-full"
               />
             </div>
           </div>
@@ -536,9 +554,11 @@ const SetupPage = () => {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <select
+                className="w-full rounded-lg border-gray-300 focus:border-purple-500 focus:ring-purple-500 p-2"
                 value={formData.campus}
                 onChange={(e) => {
                   const selectedCampus = e.target.value;
+
                   setFormData((prev) => ({
                     ...prev,
                     campus: selectedCampus,
@@ -551,7 +571,6 @@ const SetupPage = () => {
                     fetchProgramData(selectedCampus);
                   }
                 }}
-                className="w-full rounded-lg border-gray-300 focus:border-purple-500 focus:ring-purple-500 p-2"
               >
                 <option value="">Select Campus</option>
                 <option value="Seattle">Seattle</option>
@@ -560,6 +579,7 @@ const SetupPage = () => {
               </select>
 
               <select
+                className="w-full rounded-lg border-gray-300 focus:border-purple-500 focus:ring-purple-500 p-2"
                 value={formData.degreeType}
                 onChange={(e) =>
                   setFormData((prev) => ({
@@ -567,7 +587,6 @@ const SetupPage = () => {
                     degreeType: e.target.value,
                   }))
                 }
-                className="w-full rounded-lg border-gray-300 focus:border-purple-500 focus:ring-purple-500 p-2"
               >
                 <option value="">Select Degree Type</option>
                 <option value="Undergraduate">Undergraduate</option>
@@ -576,6 +595,7 @@ const SetupPage = () => {
               </select>
 
               <select
+                className="w-full rounded-lg border-gray-300 focus:border-purple-500 focus:ring-purple-500 p-2"
                 value={formData.classStanding}
                 onChange={(e) =>
                   setFormData((prev) => ({
@@ -583,7 +603,6 @@ const SetupPage = () => {
                     classStanding: e.target.value,
                   }))
                 }
-                className="w-full rounded-lg border-gray-300 focus:border-purple-500 focus:ring-purple-500 p-2"
               >
                 <option value="">Select Class Standing</option>
                 <option value="Freshman">Freshman</option>
@@ -593,33 +612,38 @@ const SetupPage = () => {
               </select>
 
               <Input
+                className="w-full"
                 label="GPA"
+                max="4.0"
+                min="0"
+                placeholder="Enter GPA (max 4.0)"
+                step="0.01"
                 type="number"
                 value={formData.gpa}
+                onBlur={(e) => {
+                  const value = e.target.value;
+
+                  if (value && !isNaN(parseFloat(value))) {
+                    const formatted = parseFloat(value).toFixed(2);
+
+                    setFormData((prev) => ({ ...prev, gpa: formatted }));
+                  }
+                }}
                 onChange={(e) => {
                   const value = e.target.value;
+
                   if (value === "") {
                     setFormData((prev) => ({ ...prev, gpa: "" }));
+
                     return;
                   }
                   if (!/^\d*\.?\d{0,2}$/.test(value)) {
                     return;
                   }
                   const numValue = parseFloat(value);
+
                   if (!isNaN(numValue) && numValue <= 4.0) {
                     setFormData((prev) => ({ ...prev, gpa: value }));
-                  }
-                }}
-                min="0"
-                max="4.0"
-                step="0.01"
-                placeholder="Enter GPA (max 4.0)"
-                className="w-full"
-                onBlur={(e) => {
-                  const value = e.target.value;
-                  if (value && !isNaN(parseFloat(value))) {
-                    const formatted = parseFloat(value).toFixed(2);
-                    setFormData((prev) => ({ ...prev, gpa: formatted }));
                   }
                 }}
               />
@@ -627,28 +651,29 @@ const SetupPage = () => {
               {/* Replace the major select with a searchable dropdown */}
               <div className="relative">
                 <Input
+                  className="w-full"
+                  disabled={!formData.campus || isLoading}
                   label="Major"
+                  placeholder={
+                    isLoading ? "Loading majors..." : "Search for your major"
+                  }
                   value={majorSearch}
                   onChange={(e) => {
                     setMajorSearch(e.target.value);
                     setIsMajorDropdownOpen(true);
                   }}
                   onFocus={() => setIsMajorDropdownOpen(true)}
-                  placeholder={
-                    isLoading ? "Loading majors..." : "Search for your major"
-                  }
-                  disabled={!formData.campus || isLoading}
-                  className="w-full"
                 />
                 {isMajorDropdownOpen && (
                   <div
-                    id="major-dropdown"
                     className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto"
+                    id="major-dropdown"
                   >
                     {filteredMajors.length > 0 ? (
                       filteredMajors.map((m) => (
                         <div
                           key={m.code}
+                          className="cursor-pointer p-2 hover:bg-gray-100"
                           onClick={() => {
                             setFormData((prev) => ({
                               ...prev,
@@ -658,7 +683,6 @@ const SetupPage = () => {
                             setMajorSearch(m.name);
                             setIsMajorDropdownOpen(false);
                           }}
-                          className="cursor-pointer p-2 hover:bg-gray-100"
                         >
                           {m.name} ({m.code})
                         </div>
@@ -672,13 +696,13 @@ const SetupPage = () => {
 
               {formData.major && (
                 <Input
+                  className="w-full"
                   label="Minor (Optional)"
+                  placeholder="Enter your minor if applicable"
                   value={formData.minor}
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, minor: e.target.value }))
                   }
-                  placeholder="Enter your minor if applicable"
-                  className="w-full"
                 />
               )}
             </div>
@@ -698,46 +722,48 @@ const SetupPage = () => {
                     onSelect={(selectedCourse) =>
                       setFormData((prev) => {
                         const updated = [...prev.currentCourses];
+
                         updated[index] = selectedCourse.code;
+
                         return { ...prev, currentCourses: updated };
                       })
                     }
                   />
                   <button
-                    onClick={() => removeCourse(index)}
                     className="mt-6 p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors"
                     type="button"
+                    onClick={() => removeCourse(index)}
                   >
                     <svg
-                      xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5"
-                      viewBox="0 0 20 20"
                       fill="currentColor"
+                      viewBox="0 0 20 20"
+                      xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
-                        fillRule="evenodd"
-                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
                         clipRule="evenodd"
+                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                        fillRule="evenodd"
                       />
                     </svg>
                   </button>
                 </div>
               ))}
               <button
-                onClick={addCourse}
-                type="button"
                 className="w-full py-2 px-4 border-2 border-dashed border-purple-300 rounded-lg text-purple-600 hover:bg-purple-50 transition-colors flex items-center justify-center gap-2"
+                type="button"
+                onClick={addCourse}
               >
                 <svg
-                  xmlns="http://www.w3.org/2000/svg"
                   className="h-5 w-5"
-                  viewBox="0 0 20 20"
                   fill="currentColor"
+                  viewBox="0 0 20 20"
+                  xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    fillRule="evenodd"
-                    d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
                     clipRule="evenodd"
+                    d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                    fillRule="evenodd"
                   />
                 </svg>
                 Add Course
@@ -754,34 +780,35 @@ const SetupPage = () => {
               {formData.studyPreferences.map((pref, index) => (
                 <div key={index} className="flex gap-2 items-center">
                   <Input
+                    className="w-full"
                     label={`Preference ${index + 1}`}
+                    placeholder="e.g., Prefer evening study sessions"
                     value={pref}
                     onChange={(e) => {
                       const newPrefs = [...formData.studyPreferences];
+
                       newPrefs[index] = e.target.value;
                       setFormData((prev) => ({
                         ...prev,
                         studyPreferences: newPrefs,
                       }));
                     }}
-                    placeholder="e.g., Prefer evening study sessions"
-                    className="w-full"
                   />
                   <button
-                    onClick={() => removePreference(index)}
                     className="mt-6 p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors"
                     type="button"
+                    onClick={() => removePreference(index)}
                   >
                     <svg
-                      xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5"
-                      viewBox="0 0 20 20"
                       fill="currentColor"
+                      viewBox="0 0 20 20"
+                      xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
-                        fillRule="evenodd"
-                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
                         clipRule="evenodd"
+                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                        fillRule="evenodd"
                       />
                     </svg>
                   </button>
@@ -789,20 +816,20 @@ const SetupPage = () => {
               ))}
 
               <button
-                onClick={addPreference}
-                type="button"
                 className="w-full py-2 px-4 border-2 border-dashed border-purple-300 rounded-lg text-purple-600 hover:bg-purple-50 transition-colors flex items-center justify-center gap-2"
+                type="button"
+                onClick={addPreference}
               >
                 <svg
-                  xmlns="http://www.w3.org/2000/svg"
                   className="h-5 w-5"
-                  viewBox="0 0 20 20"
                   fill="currentColor"
+                  viewBox="0 0 20 20"
+                  xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    fillRule="evenodd"
-                    d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
                     clipRule="evenodd"
+                    d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                    fillRule="evenodd"
                   />
                 </svg>
                 Add Preference
@@ -816,22 +843,22 @@ const SetupPage = () => {
               About You
             </h2>
             <Textarea
+              className="w-full"
               label="Bio"
+              minRows={4}
+              placeholder="Tell about yourself..."
               value={formData.bio}
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, bio: e.target.value }))
               }
-              placeholder="Tell about yourself..."
-              className="w-full"
-              minRows={4}
             />
           </div>
 
           {/* Submit Button */}
           <Button
             className="w-full bg-gradient-to-r from-[#4b2e83] to-[#85754d] text-white py-3 rounded-lg hover:opacity-90 transition-opacity"
-            onClick={handleSubmit}
             disabled={!formData.name || !formData.campus || !formData.major}
+            onClick={handleSubmit}
           >
             Complete Profile
           </Button>

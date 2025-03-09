@@ -1,5 +1,6 @@
-import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+
+import { NextResponse } from "next/server";
 
 // Add paths that require authentication
 const protectedPaths = ["/dashboard", "/about"];
@@ -19,6 +20,7 @@ export function middleware(request: NextRequest) {
     if (protectedPaths.includes(path)) {
       return NextResponse.redirect(new URL("/", request.url));
     }
+
     return NextResponse.next();
   }
 
