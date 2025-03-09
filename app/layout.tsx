@@ -50,12 +50,12 @@ export default function RootLayout({
             <main className="container mx-auto max-w-7xl pt-16 px-6 flex-grow">
               {children}
             </main>
-            {/* <footer className="fixed bottom-0 w-full flex items-center justify-center py-3 bg-white/5 backdrop-blur-sm border-t border-white/10 shadow-lg z-50">
+            <footer className="fixed bottom-0 w-full flex items-center justify-center py-3 bg-white/5 backdrop-blur-sm border-t border-white/10 shadow-lg z-50">
               <p>
                 ©INFO 442: Group 5 (Sirak Yohannes, Aaron Jones, Christopher
                 May Chen, Mykyta Lepikash, Sid Jayadev)
               </p>
-            </footer> */}
+            </footer> 
           </div>
         </Providers>
       </body>

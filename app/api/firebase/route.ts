@@ -1,19 +1,5 @@
 import { NextResponse } from "next/server";
-import admin from "firebase-admin";
-import serviceAccount from  "../../../info442-518fd-firebase-adminsdk-fbsvc-d8d1a79aa6.json";
-
-// Initialize Firebase Admin if it hasn't been initialized yet
-if (!admin.apps.length) {
-  try {
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
-    });
-  } catch (error) {
-    console.error("Error initializing Firebase Admin:", error);
-  }
-}
-
-const db = admin.firestore();
+import { adminDb } from "@/app/lib/firebase-admin";
 
 export async function GET(request: Request) {
   try {
@@ -29,7 +15,7 @@ export async function GET(request: Request) {
     }
 
     console.log(`Fetching user data for UID: ${uid}`);
-    const userDoc = await db.collection("users").doc(uid).get();
+    const userDoc = await adminDb.collection("users").doc(uid).get();
 
     if (!userDoc.exists) {
       console.log(`No user found for UID: ${uid}`);
@@ -61,7 +47,7 @@ export async function POST(request: Request) {
     }
 
     console.log(`Saving user data for UID: ${uid}`);
-    await db.collection("users").doc(uid).set(userData, { merge: true });
+    await adminDb.collection("users").doc(uid).set(userData, { merge: true });
     console.log(`Successfully saved user data for UID: ${uid}`);
 
     return NextResponse.json({ success: true });
