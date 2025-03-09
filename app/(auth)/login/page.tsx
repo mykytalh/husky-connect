@@ -28,25 +28,39 @@ const Page = () => {
       );
 
       if (userCredential.user) {
-        // Fetch user data to check setup completion
-        const response = await fetch(
-          `/api/firebase?uid=${userCredential.user.uid}`
-        );
-        const userData = await response.json();
+        const token = await userCredential.user.getIdToken();
+        // Set auth token cookie first
+        Cookies.set("auth-token", token);
 
-        // Set auth token cookie
-        Cookies.set("auth-token", await userCredential.user.getIdToken());
+        try {
+          // Fetch user data to check setup completion
+          const response = await fetch(
+            `/api/firebase?uid=${userCredential.user.uid}`
+          );
 
-        // Set setup-complete cookie based on user data
-        if (userData && userData.setupComplete) {
-          Cookies.set("setup-complete", "true");
-          router.push("/dashboard");
-        } else {
+          if (!response.ok) {
+            throw new Error("Failed to fetch user data");
+          }
+
+          const userData = await response.json();
+
+          // Check if userData exists and has setupComplete property
+          if (userData && userData.setupComplete === true) {
+            Cookies.set("setup-complete", "true");
+            router.push("/dashboard");
+          } else {
+            Cookies.set("setup-complete", "false");
+            router.push("/setup");
+          }
+        } catch (fetchError) {
+          console.error("Error fetching user data:", fetchError);
+          // If we can't fetch user data, assume setup is not complete
           Cookies.set("setup-complete", "false");
           router.push("/setup");
         }
       }
     } catch (err: any) {
+      console.error("Login error:", err);
       setError(err.message);
     }
   };
