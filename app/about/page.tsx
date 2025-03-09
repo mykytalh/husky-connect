@@ -4,8 +4,10 @@ import { useState, useEffect } from "react";
 import { Card } from "@heroui/card";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
+import { Button } from "@heroui/button";
 
 import { auth } from "@/app/firebase/config";
+import { checkProfileCompletion } from "@/app/utils/checkProfileCompletion";
 
 interface UserProfile {
   name: string;
@@ -30,13 +32,44 @@ const LoadingSpinner = () => (
   </div>
 );
 
-const ErrorDisplay = ({ message }: { message: string }) => (
-  <div className="min-h-screen flex items-center justify-center">
-    <div className="text-center">
-      <h1 className="text-2xl font-bold text-gray-800 mb-4">
-        Error Loading Profile
-      </h1>
-      <p className="text-gray-600">{message}</p>
+const ErrorDisplay = () => (
+  <div className="min-h-screen p-8">
+    <div className="max-w-md mx-auto text-center">
+      <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-100">
+        <h2 className="text-2xl font-bold text-[#4b2e83] mb-4">
+          Error Loading Profile
+        </h2>
+        <p className="text-gray-600 mb-6">
+          Unable to load profile information. Please try again later.
+        </p>
+        <Button
+          className="bg-gradient-to-r from-[#4b2e83] to-[#85754d] text-white px-6 py-3 rounded-xl hover:opacity-90 transition-opacity"
+          onClick={() => window.location.href = "/dashboard"}
+        >
+          Back to Dashboard
+        </Button>
+      </div>
+    </div>
+  </div>
+);
+
+const IncompleteProfileMessage = () => (
+  <div className="min-h-screen p-8">
+    <div className="max-w-md mx-auto text-center">
+      <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-100">
+        <h2 className="text-2xl font-bold text-[#4b2e83] mb-4">
+          Complete Your Profile
+        </h2>
+        <p className="text-gray-600 mb-6">
+          Please complete your profile information to access this page.
+        </p>
+        <Button
+          className="bg-gradient-to-r from-[#4b2e83] to-[#85754d] text-white px-6 py-3 rounded-xl hover:opacity-90 transition-opacity"
+          onClick={() => window.location.href = "/setup"}
+        >
+          Complete Profile
+        </Button>
+      </div>
     </div>
   </div>
 );
@@ -58,7 +91,6 @@ const AboutPage = () => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!user) {
         router.push("/");
-
         return;
       }
 
@@ -70,12 +102,17 @@ const AboutPage = () => {
           throw new Error(data.error || "Failed to fetch profile");
         }
 
-        setProfile(data);
-        setError(null);
+        // Check if profile is complete
+        if (!checkProfileCompletion(data)) {
+          setError("incomplete_profile");
+        } else {
+          setProfile(data);
+          setError(null);
+        }
       } catch (err) {
         console.error("Error fetching profile:", err);
         setError(
-          err instanceof Error ? err.message : "Failed to fetch profile",
+          err instanceof Error ? err.message : "Failed to fetch profile"
         );
       } finally {
         setLoading(false);
@@ -87,8 +124,8 @@ const AboutPage = () => {
 
   if (!mounted) return null;
   if (loading) return <LoadingSpinner />;
-  if (error) return <ErrorDisplay message={error} />;
-  if (!profile) return <ErrorDisplay message="No profile data found" />;
+  if (error === "incomplete_profile") return <IncompleteProfileMessage />;
+  if (error || !profile) return <ErrorDisplay />;
 
   return (
     <div className="min-h-screen py-12 px-6">

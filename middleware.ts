@@ -2,11 +2,13 @@ import type { NextRequest } from "next/server";
 
 import { NextResponse } from "next/server";
 
-// Add paths that require authentication
+// Routes that require authentication
 const protectedPaths = ["/dashboard", "/about"];
-// Add paths that are only for non-authenticated users
+
+// Routes that are ONLY for non-authenticated users
 const publicOnlyPaths = ["/", "/login", "/register"];
-// Add paths that don't require setup completion
+
+// Routes exempt from setup requirement
 const setupExemptPaths = ["/setup"];
 
 export function middleware(request: NextRequest) {
@@ -14,27 +16,24 @@ export function middleware(request: NextRequest) {
   const setupComplete = request.cookies.get("setup-complete")?.value;
   const path = request.nextUrl.pathname;
 
-  // If user is not authenticated
-  if (!token) {
-    // If trying to access protected route, redirect to home
-    if (protectedPaths.includes(path)) {
-      return NextResponse.redirect(new URL("/", request.url));
+  // If user is authenticated (has token)
+  if (token) {
+    // Prevent authenticated users from accessing public-only routes
+    if (publicOnlyPaths.includes(path)) {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+
+    // Check setup completion for non-exempt routes
+    if (!setupComplete && !setupExemptPaths.includes(path)) {
+      return NextResponse.redirect(new URL("/setup", request.url));
     }
 
     return NextResponse.next();
   }
 
-  // If user is authenticated
-  if (token) {
-    // Redirect from public routes to dashboard
-    if (publicOnlyPaths.includes(path)) {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
-    }
-
-    // If setup is not complete and trying to access any route except setup
-    if (!setupComplete && !setupExemptPaths.includes(path)) {
-      return NextResponse.redirect(new URL("/setup", request.url));
-    }
+  // If user is NOT authenticated (no token)
+  if (!token && protectedPaths.includes(path)) {
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   return NextResponse.next();

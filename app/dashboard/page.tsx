@@ -6,6 +6,7 @@ import { Input } from "@heroui/input";
 import { useRouter } from "next/navigation";
 
 import { auth } from "@/app/firebase/config";
+import { checkProfileCompletion } from "@/app/utils/checkProfileCompletion";
 
 interface Post {
   id: string;
@@ -63,7 +64,7 @@ const CourseSelector = ({
     .filter(
       (c) =>
         c.code.toLowerCase().includes(search.toLowerCase()) ||
-        c.name.toLowerCase().includes(search.toLowerCase()),
+        c.name.toLowerCase().includes(search.toLowerCase())
     )
     .slice(0, displayLimit);
 
@@ -193,7 +194,7 @@ const MajorSelector = ({
     .filter(
       (m) =>
         m.code.toLowerCase().includes(search.toLowerCase()) ||
-        m.name.toLowerCase().includes(search.toLowerCase()),
+        m.name.toLowerCase().includes(search.toLowerCase())
     )
     .slice(0, displayLimit);
 
@@ -285,12 +286,36 @@ const MajorSelector = ({
   );
 };
 
+const IncompleteProfileMessage = () => (
+  <div className="min-h-screen p-8">
+    <div className="max-w-md mx-auto text-center">
+      <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-100">
+        <h2 className="text-2xl font-bold text-[#4b2e83] mb-4">
+          Complete Your Profile
+        </h2>
+        <p className="text-gray-600 mb-6">
+          To view and interact with posts, please complete your profile
+          information first.
+        </p>
+        <button
+          onClick={() => (window.location.href = "/setup")}
+          className="bg-gradient-to-r from-[#4b2e83] to-[#85754d] text-white px-6 py-3 rounded-xl hover:opacity-90 transition-opacity"
+        >
+          Complete Profile
+        </button>
+      </div>
+    </div>
+  </div>
+);
+
 export default function DashboardPage() {
   const router = useRouter();
   const [posts, setPosts] = useState<Post[]>([]);
   const [filteredPosts, setFilteredPosts] = useState<Post[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingPosts, setIsLoadingPosts] = useState(true);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [profileComplete, setProfileComplete] = useState<boolean>(false);
 
   // Filter states
   const [filters, setFilters] = useState({
@@ -299,17 +324,20 @@ export default function DashboardPage() {
     course: "",
   });
   const [majors, setMajors] = useState<Array<{ code: string; name: string }>>(
-    [],
+    []
   );
   const [courses, setCourses] = useState<Course[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(false);
+
+  // Combine both loading states into one
+  const isLoading = isLoadingPosts || isLoadingProfile;
 
   // Fetch program data when campus changes
   const fetchProgramData = async (campus: string) => {
     setIsLoadingData(true);
     try {
       const majorsRes = await fetch(
-        `/api/majors?campus=${encodeURIComponent(campus)}&type=majors`,
+        `/api/majors?campus=${encodeURIComponent(campus)}&type=majors`
       );
 
       if (!majorsRes.ok)
@@ -319,20 +347,20 @@ export default function DashboardPage() {
         ([code, name]) => ({
           code,
           name: name as string,
-        }),
+        })
       );
 
       setMajors(majorsList);
 
       const coursesRes = await fetch(
-        `/api/courses?campus=${encodeURIComponent(campus)}&type=courses`,
+        `/api/courses?campus=${encodeURIComponent(campus)}&type=courses`
       );
 
       if (!coursesRes.ok)
         throw new Error(`Failed to fetch courses: ${coursesRes.statusText}`);
       const coursesData = await coursesRes.json();
       const coursesList: Course[] = Object.entries(
-        coursesData.courses || {},
+        coursesData.courses || {}
       ).map(([code, data]: [string, any]) => ({
         code,
         name: data["Course Name"] ? data["Course Name"] : code,
@@ -349,8 +377,27 @@ export default function DashboardPage() {
   };
 
   useEffect(() => {
+    const checkProfile = async (userId: string) => {
+      try {
+        const response = await fetch(`/api/firebase?uid=${userId}`);
+        const data = await response.json();
+
+        if (response.ok) {
+          const isComplete = checkProfileCompletion(data);
+          setProfileComplete(isComplete);
+        }
+      } catch (error) {
+        console.error("Error checking profile:", error);
+      } finally {
+        setIsLoadingProfile(false);
+      }
+    };
+
     const unsubscribe = auth.onAuthStateChanged((user) => {
       setCurrentUserId(user?.uid || null);
+      if (user?.uid) {
+        checkProfile(user.uid);
+      }
     });
 
     return () => unsubscribe();
@@ -364,7 +411,7 @@ export default function DashboardPage() {
         if (!response.ok) throw new Error("Failed to fetch posts");
         const data = await response.json();
         const sortedPosts = data.sort(
-          (a: Post, b: Post) => b.createdAt - a.createdAt,
+          (a: Post, b: Post) => b.createdAt - a.createdAt
         );
 
         setPosts(sortedPosts);
@@ -372,7 +419,7 @@ export default function DashboardPage() {
       } catch (error) {
         console.error("Error fetching posts:", error);
       } finally {
-        setIsLoading(false);
+        setIsLoadingPosts(false);
       }
     };
 
@@ -410,7 +457,7 @@ export default function DashboardPage() {
         `/api/posts?id=${postId}&userId=${currentUserId}`,
         {
           method: "DELETE",
-        },
+        }
       );
 
       if (!response.ok) throw new Error("Failed to delete post");
@@ -423,6 +470,7 @@ export default function DashboardPage() {
     }
   };
 
+  // Show loading spinner while ANYTHING is loading
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -431,6 +479,12 @@ export default function DashboardPage() {
     );
   }
 
+  // Only show content after everything is loaded
+  if (!profileComplete) {
+    return <IncompleteProfileMessage />;
+  }
+
+  // Show dashboard content only when profile is complete and everything is loaded
   return (
     <div className="min-h-screen p-8">
       <div className="max-w-4xl mx-auto">
@@ -484,7 +538,10 @@ export default function DashboardPage() {
               majors={majors}
               value={filters.major}
               onSelect={(selectedMajor) => {
-                setFilters((prev) => ({ ...prev, major: selectedMajor.code }));
+                setFilters((prev) => ({
+                  ...prev,
+                  major: selectedMajor.code,
+                }));
               }}
             />
 
@@ -558,7 +615,7 @@ export default function DashboardPage() {
                             year: "numeric",
                             month: "long",
                             day: "numeric",
-                          },
+                          }
                         )}
                       </p>
                     </div>
