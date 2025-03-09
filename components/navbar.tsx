@@ -21,6 +21,7 @@ export const Navbar = () => {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const profileDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -63,10 +64,16 @@ export const Navbar = () => {
     }
   };
 
+  const handleMenuItemClick = () => {
+    setIsMenuOpen(false);
+  };
+
   return (
     <HeroUINavbar
       className="fixed top-0 left-0 right-0 bg-white/5 backdrop-blur-sm border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)]"
       maxWidth="xl"
+      isMenuOpen={isMenuOpen}
+      onMenuOpenChange={setIsMenuOpen}
     >
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
         <NavbarBrand className="gap-3 max-w-fit">
@@ -143,6 +150,7 @@ export const Navbar = () => {
           <NextLink
             className="text-gray-700 hover:text-[#4b2e83] transition-colors w-full py-2 block"
             href="/dashboard"
+            onClick={handleMenuItemClick}
           >
             Dashboard
           </NextLink>
@@ -150,15 +158,8 @@ export const Navbar = () => {
         <NavbarMenuItem>
           <NextLink
             className="text-gray-700 hover:text-[#4b2e83] transition-colors w-full py-2 block"
-            href="/messages"
-          >
-            Messages
-          </NextLink>
-        </NavbarMenuItem>
-        <NavbarMenuItem>
-          <NextLink
-            className="text-gray-700 hover:text-[#4b2e83] transition-colors w-full py-2 block"
             href="/about"
+            onClick={handleMenuItemClick}
           >
             Profile
           </NextLink>
@@ -167,7 +168,10 @@ export const Navbar = () => {
           <NavbarMenuItem>
             <button
               className="text-red-500 hover:text-red-600 transition-colors w-full py-2 text-left"
-              onClick={handleLogout}
+              onClick={() => {
+                handleLogout();
+                handleMenuItemClick();
+              }}
             >
               Log Out
             </button>
