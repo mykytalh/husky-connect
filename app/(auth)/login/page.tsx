@@ -44,19 +44,19 @@ const Page = () => {
 
           const userData = await response.json();
 
-          // Check if userData exists and has setupComplete property
+          // Set the cookie and redirect
           if (userData && userData.setupComplete === true) {
             Cookies.set("setup-complete", "true");
-            router.push("/dashboard");
+            // Force a hard navigation to ensure middleware runs
+            window.location.href = "/dashboard";
           } else {
             Cookies.set("setup-complete", "false");
-            router.push("/setup");
+            window.location.href = "/setup";
           }
         } catch (fetchError) {
           console.error("Error fetching user data:", fetchError);
-          // If we can't fetch user data, assume setup is not complete
           Cookies.set("setup-complete", "false");
-          router.push("/setup");
+          window.location.href = "/setup";
         }
       }
     } catch (err: any) {

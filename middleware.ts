@@ -29,17 +29,23 @@ export function middleware(request: NextRequest) {
 
   // User is authenticated
   if (token) {
-    // Redirect from public routes to dashboard
+    // Always redirect from public routes to dashboard when authenticated
     if (PUBLIC_ROUTES.has(pathname)) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
 
-    // Allow access to all protected routes when authenticated
+    // Check setup status for protected routes
     if (PROTECTED_ROUTES.has(pathname)) {
+      // If setup is not complete and trying to access anything other than setup page
+      if (setupComplete === "false" && pathname !== "/setup") {
+        return NextResponse.redirect(new URL("/setup", request.url));
+      }
+      // If setup is complete and trying to access setup page
+      if (setupComplete === "true" && pathname === "/setup") {
+        return NextResponse.redirect(new URL("/dashboard", request.url));
+      }
       return NextResponse.next();
     }
-
-    return NextResponse.next();
   }
 
   // User is not authenticated
@@ -48,11 +54,8 @@ export function middleware(request: NextRequest) {
     if (PUBLIC_ROUTES.has(pathname)) {
       return NextResponse.next();
     }
-
-    // Redirect to home page for protected routes
-    if (PROTECTED_ROUTES.has(pathname)) {
-      return NextResponse.redirect(new URL("/", request.url));
-    }
+    // Redirect to login for protected routes
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
   return NextResponse.next();
