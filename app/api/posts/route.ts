@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import admin from "firebase-admin";
-import serviceAccount from "../../../info442-518fd-firebase-adminsdk-fbsvc-ab3cebd75b.json";
+import serviceAccount from  "../../../info442-518fd-firebase-adminsdk-fbsvc-f437a48bb9.json";
 
 if (!admin.apps.length) {
   try {
