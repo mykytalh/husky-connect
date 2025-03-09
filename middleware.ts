@@ -35,9 +35,9 @@ export function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
 
-    // Check setup completion
-    if (!setupComplete && !SETUP_EXEMPT_ROUTES.has(pathname)) {
-      return NextResponse.redirect(new URL("/setup", request.url));
+    // Allow access to all protected routes when authenticated
+    if (PROTECTED_ROUTES.has(pathname)) {
+      return NextResponse.next();
     }
 
     return NextResponse.next();
