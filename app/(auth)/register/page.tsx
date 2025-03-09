@@ -8,6 +8,7 @@ import { Button } from "@heroui/button";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import Link from "next/link";
 import React from "react";
+import Cookies from "js-cookie";
 
 import { auth } from "@/app/firebase/config";
 
@@ -23,11 +24,17 @@ const Page = () => {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
-        password,
+        password
       );
 
       if (userCredential.user) {
-        router.push("/setup"); // Redirect to home page after successful registration
+        // Set auth token cookie
+        Cookies.set("auth-token", await userCredential.user.getIdToken());
+
+        // For new registrations, setup is never complete
+        Cookies.set("setup-complete", "false");
+
+        router.push("/setup");
       }
     } catch (err: any) {
       setError(err.message);

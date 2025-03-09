@@ -4,7 +4,6 @@ import { NextResponse } from "next/server";
 // Define route groups
 const PUBLIC_ROUTES = new Set(["/", "/login", "/register"]);
 const PROTECTED_ROUTES = new Set(["/dashboard", "/about", "/setup"]);
-const SETUP_EXEMPT_ROUTES = new Set(["/setup"]);
 const STATIC_ROUTES = new Set([
   "/favicon.ico",
   "/_next",
