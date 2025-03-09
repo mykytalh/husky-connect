@@ -12,6 +12,21 @@ import { fontSans } from "@/config/fonts";
 import { HomeNavbar } from "@/components/homeNavbar";
 import { Navbar } from "@/components/navbar";
 
+// Create a new utility function for prefetching
+const prefetchData = async () => {
+  const campuses = ["Seattle", "Bothell", "Tacoma"];
+
+  // Prefetch all campuses data in parallel
+  await Promise.all([
+    ...campuses.map((campus) =>
+      fetch(`/api/majors?campus=${campus}&type=majors`, { priority: "low" })
+    ),
+    ...campuses.map((campus) =>
+      fetch(`/api/courses?campus=${campus}&type=courses`, { priority: "low" })
+    ),
+  ]);
+};
+
 export default function RootLayout({
   children,
 }: {
@@ -29,6 +44,11 @@ export default function RootLayout({
     return () => unsubscribe();
   }, []);
 
+  // Use useEffect to trigger the prefetch
+  useEffect(() => {
+    prefetchData();
+  }, []);
+
   // Show nothing while checking auth status to prevent flash of wrong navbar
   if (isLoading) {
     return null;
@@ -40,10 +60,10 @@ export default function RootLayout({
       <body
         className={clsx(
           "min-h-screen bg-background font-sans antialiased",
-          fontSans.variable,
+          fontSans.variable
         )}
       >
-        <Providers themeProps={{ attribute: "class"}}>
+        <Providers themeProps={{ attribute: "class" }}>
           <div className="relative flex flex-col h-screen">
             {isAuthenticated ? <Navbar /> : <HomeNavbar />}
             <main className="container mx-auto max-w-7xl pt-16 px-6 flex-grow">
