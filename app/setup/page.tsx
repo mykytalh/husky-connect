@@ -360,12 +360,6 @@ const SetupPage = () => {
     try {
       const user = auth.currentUser;
 
-      if (!user) {
-        router.push("/");
-
-        return;
-      }
-
       // Create a clean version of formData
       const { image: _, ...cleanFormData } = formData;
 
@@ -384,7 +378,7 @@ const SetupPage = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          uid: user.uid,
+          uid: user?.uid,
           userData: userData,
         }),
       });
