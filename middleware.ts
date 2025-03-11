@@ -37,7 +37,11 @@ export function middleware(request: NextRequest) {
     // Check setup status for protected routes
     if (PROTECTED_ROUTES.has(pathname)) {
       // Only redirect to setup if setup is not complete and trying to access dashboard or about
-      if (setupComplete === "false" && pathname !== "/setup" && (pathname === "/dashboard" || pathname === "/about")) {
+      if (
+        setupComplete === "false" &&
+        pathname !== "/setup" &&
+        (pathname === "/dashboard" || pathname === "/about")
+      ) {
         return NextResponse.redirect(new URL("/setup", request.url));
       }
       return NextResponse.next();
@@ -58,7 +62,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    "/((?!api|_next/static|_next/image|favicon.ico).*)",
-  ],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };

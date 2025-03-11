@@ -371,7 +371,7 @@ const SetupPage = () => {
       // Use imagePreview directly as the imageUrl
       const userData = {
         ...cleanFormData,
-        imageUrl: formData.imagePreview || "", // Use the base64 string directly
+        imageUrl: formData.imagePreview || "",
         setupComplete: true,
         updatedAt: new Date(),
       };
@@ -392,11 +392,11 @@ const SetupPage = () => {
         throw new Error("Failed to save profile");
       }
 
-      // Set setup completion cookie first
+      // Set setup completion cookie
       Cookies.set("setup-complete", "true");
 
-      // Force a hard navigation to dashboard
-      window.location.href = "/dashboard";
+      // Use router.push for smoother navigation
+      router.push("/dashboard");
     } catch (error) {
       console.error("Error saving user data:", error);
       alert("An error occurred while saving your profile");
