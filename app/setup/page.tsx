@@ -398,11 +398,8 @@ const SetupPage = () => {
       // Wait a brief moment to ensure cookie is set
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      // Use both router.push and window.location as fallback
-      router.push("/dashboard").catch(() => {
-        // If router.push fails, use window.location
-        window.location.href = "/dashboard";
-      });
+      // Use window.location for reliable redirect
+      window.location.href = "/dashboard";
     } catch (error) {
       console.error("Error saving user data:", error);
       alert("An error occurred while saving your profile");
