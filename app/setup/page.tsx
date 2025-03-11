@@ -392,11 +392,17 @@ const SetupPage = () => {
         throw new Error("Failed to save profile");
       }
 
-      // Set setup completion cookie
-      Cookies.set("setup-complete", "true");
+      // Set cookie first
+      Cookies.set("setup-complete", "true", { path: "/" });
 
-      // Use router.push for smoother navigation
-      router.push("/dashboard");
+      // Wait a brief moment to ensure cookie is set
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Use both router.push and window.location as fallback
+      router.push("/dashboard").catch(() => {
+        // If router.push fails, use window.location
+        window.location.href = "/dashboard";
+      });
     } catch (error) {
       console.error("Error saving user data:", error);
       alert("An error occurred while saving your profile");
