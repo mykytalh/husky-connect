@@ -33,7 +33,7 @@ const CourseSelector = ({
     .filter(
       (c) =>
         c.code.toLowerCase().includes(search.toLowerCase()) ||
-        c.name.toLowerCase().includes(search.toLowerCase()),
+        c.name.toLowerCase().includes(search.toLowerCase())
     )
     .slice(0, displayLimit); // Limit the number of displayed results
 
@@ -129,7 +129,7 @@ const SetupPage = () => {
   });
 
   const [majors, setMajors] = useState<Array<{ code: string; name: string }>>(
-    [],
+    []
   );
   const [courses, setCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -216,7 +216,7 @@ const SetupPage = () => {
     try {
       // Fetch majors
       const majorsRes = await fetch(
-        `/api/majors?campus=${encodeURIComponent(campus)}&type=majors`,
+        `/api/majors?campus=${encodeURIComponent(campus)}&type=majors`
       );
 
       if (!majorsRes.ok) {
@@ -227,14 +227,14 @@ const SetupPage = () => {
         ([code, name]) => ({
           code,
           name: name as string,
-        }),
+        })
       );
 
       setMajors(majorsList);
 
       // Fetch courses using your endpoint
       const coursesRes = await fetch(
-        `/api/courses?campus=${encodeURIComponent(campus)}&type=courses`,
+        `/api/courses?campus=${encodeURIComponent(campus)}&type=courses`
       );
 
       if (!coursesRes.ok) {
@@ -243,7 +243,7 @@ const SetupPage = () => {
       const coursesData = await coursesRes.json();
       // Convert the courses object into an array of { code, name }
       const coursesList: Course[] = Object.entries(
-        coursesData.courses || {},
+        coursesData.courses || {}
       ).map(([code, data]: [string, any]) => ({
         code,
         name: data["Course Name"] ? data["Course Name"] : code,
@@ -346,19 +346,24 @@ const SetupPage = () => {
 
   // Filter majors based on the search input (case-insensitive)
   const filteredMajors = majors.filter((m) =>
-    m.name.toLowerCase().includes(majorSearch.toLowerCase()),
+    m.name.toLowerCase().includes(majorSearch.toLowerCase())
   );
 
   const handleSubmit = async () => {
-    // Validate required fields
-    if (!formData.name || !formData.campus || !formData.major) {
-      alert("Please fill in all required fields");
-
+    // Validate only name is required
+    if (!formData.name) {
+      alert("Please enter your name");
       return;
     }
 
     try {
       const user = auth.currentUser;
+
+      if (!user) {
+        console.error("No authenticated user found");
+        router.push("/login");
+        return;
+      }
 
       // Create a clean version of formData
       const { image: _, ...cleanFormData } = formData;
@@ -378,7 +383,7 @@ const SetupPage = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          uid: user?.uid,
+          uid: user.uid,
           userData: userData,
         }),
       });
@@ -387,11 +392,11 @@ const SetupPage = () => {
         throw new Error("Failed to save profile");
       }
 
-      // Set setup completion cookie
+      // Set setup completion cookie first
       Cookies.set("setup-complete", "true");
 
-      // Redirect to dashboard
-      router.push("/dashboard");
+      // Force a hard navigation to dashboard
+      window.location.href = "/dashboard";
     } catch (error) {
       console.error("Error saving user data:", error);
       alert("An error occurred while saving your profile");
@@ -851,7 +856,7 @@ const SetupPage = () => {
           {/* Submit Button */}
           <Button
             className="w-full bg-gradient-to-r from-[#4b2e83] to-[#85754d] text-white py-3 rounded-lg hover:opacity-90 transition-opacity"
-            disabled={!formData.name || !formData.campus || !formData.major}
+            disabled={!formData.name}
             onClick={handleSubmit}
           >
             Complete Profile
