@@ -487,7 +487,7 @@ export default function DashboardPage() {
   // Show dashboard content only when profile is complete and everything is loaded
   return (
     <div className="min-h-screen p-8">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto mb-10">
         {/* Header Section */}
         <div className="flex justify-between items-center mb-8 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <div>

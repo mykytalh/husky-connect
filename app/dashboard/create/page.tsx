@@ -296,7 +296,7 @@ export default function CreatePost() {
 
   return (
     <div className="min-h-screen p-8 max-w-2xl mx-auto">
-      <div className="p-6 rounded-lg bg-white/5 border border-white/10">
+      <div className="p-6 rounded-lg bg-white/5 border border-white/10 mb-10">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold">Create a Post</h2>
           <Button

@@ -417,7 +417,7 @@ const SetupPage = () => {
 
   return (
     <div className="min-h-screen py-12 px-4">
-      <div className="max-w-2xl mx-auto space-y-8">
+      <div className="max-w-2xl mx-auto space-y-8 mb-10">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-[#4b2e83] to-[#85754d] text-transparent bg-clip-text mb-4">
             Complete Your Profile
