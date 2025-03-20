@@ -34,8 +34,7 @@ export default function RootLayout({
               </main>
               <footer className="w-full flex items-center justify-center py-3 fixed bottom-0 left-0 right-0 bg-white/5 backdrop-blur-sm border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
                 <p>
-                  ©INFO 442: Group 5 (Sirak Yohannes, Aaron Jones, Christopher
-                  May Chen, Mykyta Lepikash, Sid Jayadev)
+                  ©Mykyta Lepikash
                 </p>
               </footer>
             </div>
